@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
-import { OpenAI } from 'openai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { logger } from '@/lib/utils';
-
-const client = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL
-});
+import { localAI } from '@/lib/localAI';
 
 export async function POST(request: Request) {
   try {
@@ -51,17 +46,14 @@ Format with:
     };
 
     const allMessages = [systemMessage, ...messages];
-    logger.info('[Summarize] Sending request to OpenAI');
+    logger.info('[Summarize] Sending request to local AI model');
 
-    const response = await client.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: allMessages,
+    const summary = await localAI.createChatCompletion(allMessages, {
       temperature: 0.7,
       max_tokens: 1000,
     });
 
-    logger.info('[Summarize] Received response from OpenAI');
-    const summary = response.choices[0]?.message?.content;
+    logger.info('[Summarize] Received response from local AI model');
 
     if (!summary) {
       logger.error('[Summarize] No summary generated');
