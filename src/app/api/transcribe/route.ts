@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { getExtensionFromMimeType } from '@/lib/audio';
 import { logger } from '@/lib/utils';
+import { localAI } from '@/lib/localAI';
 import { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
-
-const client = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL
-});
 
 async function formatWithAI(
   text: string, 
@@ -33,21 +28,18 @@ Make minimal changes to improve readability while keeping the original meaning a
 
 Make minimal changes to improve readability while keeping the original meaning and structure intact.`;
 
-    const response = await client.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: `Please format this transcript:\n\n${text}`
-        }
-      ]
-    });
+    const response = await localAI.createChatCompletion([
+      {
+        role: "system",
+        content: systemPrompt
+      },
+      {
+        role: 'user',
+        content: `Please format this transcript:\n\n${text}`
+      }
+    ]);
 
-    return response.choices[0]?.message?.content || text;
+    return response || text;
   } catch (error) {
     logger.error('AI formatting error:', error);
     return text; // If AI formatting fails, return the original text
@@ -213,16 +205,12 @@ async function transcribeInChunks(
         const chunkFile = new File([chunkBuffer], `chunk-${i}${extension}`, { type:fileType });
 
         if (language !== 'auto') {
-          response = await client.audio.transcriptions.create({
-            model: 'whisper-1',
-            file: chunkFile,
+          response = await localAI.createTranscription(chunkFile, {
             response_format: "text",
             language: language
           });
         } else {
-          response = await client.audio.transcriptions.create({
-            model: 'whisper-1',
-            file: chunkFile,
+          response = await localAI.createTranscription(chunkFile, {
             response_format: "text",
             prompt: "如果是中文，请使用简体中文"
           });

@@ -5,19 +5,41 @@
 
 <h2 id="english">English</h2>
 
-A podcast transcription application based on Next.js and OpenAI Whisper API, supporting audio file transcription and intelligent summary generation.
+A podcast transcription application based on Next.js, supporting both OpenAI APIs and locally deployed AI models for audio transcription and intelligent summary generation.
 
 ## ✨ Features
 
 - 🎯 Support both file upload and URL input
 - 🎙️ Support for Xiaoyuzhou podcast transcription
-- 📝 High-quality audio transcription using OpenAI Whisper API
-- 📊 AI-powered content summarization
+- 📝 High-quality audio transcription using OpenAI Whisper API or local models
+- 📊 AI-powered content summarization with local or cloud models
 - 🎨 Modern UI design
 - 💾 Download transcripts and summaries
 - 🎵 Built-in audio player
 
 ## 🚀 Getting Started
+
+### Local Model Deployment
+
+This application supports locally deployed AI models as an alternative to OpenAI's APIs. You can use:
+
+**Option 1: OpenAI-Compatible API Server (Recommended)**
+- Use tools like [Ollama](https://ollama.ai/), [LocalAI](https://localai.io/), or [vLLM](https://vllm.readthedocs.io/)
+- Set `NEXT_PUBLIC_BASE_URL` to your server's base URL
+- Models will be called using OpenAI-compatible endpoints
+
+**Option 2: Direct Model Endpoints**
+- Point directly to your model endpoints using `LOCAL_*_ENDPOINT` variables
+- Useful for custom model servers or non-OpenAI-compatible APIs
+
+**Recommended Local Setup:**
+```bash
+# Example using Ollama for chat completion
+ollama serve  # Starts on http://localhost:11434
+
+# Example using whisper.cpp for transcription
+./whisper-server --port 8001  # Starts on http://localhost:8001
+```
 
 ### Prerequisites
 
@@ -44,9 +66,21 @@ pnpm install
 3. Configure environment variables:
 Create a `.env.local` file and add:
 ```env
-NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key
-NEXT_PUBLIC_BASE_URL=your_endpoint
+# For OpenAI-compatible local API server (recommended)
+NEXT_PUBLIC_OPENAI_API_KEY=local-key
+NEXT_PUBLIC_BASE_URL=http://localhost:8000/v1
+
+# For direct local model endpoints (alternative)
+LOCAL_WHISPER_ENDPOINT=http://localhost:8001/v1/audio/transcriptions
+LOCAL_CHAT_ENDPOINT=http://localhost:8000/v1/chat/completions
+LOCAL_WHISPER_MODEL=whisper-1
+LOCAL_CHAT_MODEL=llama-3.1-8b-instruct
 ```
+
+**Local Model Setup:**
+- If `NEXT_PUBLIC_BASE_URL` is set, the app will use OpenAI-compatible API endpoints
+- Otherwise, it will use direct endpoints specified by `LOCAL_*_ENDPOINT` variables
+- Model names can be customized via `LOCAL_*_MODEL` variables
 
 4. Start the development server:
 ```bash
@@ -126,6 +160,28 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## 🚀 快速开始
 
+### 本地模型部署
+
+此应用支持本地部署的 AI 模型作为 OpenAI API 的替代方案。您可以使用：
+
+**选项 1：OpenAI 兼容的 API 服务器（推荐）**
+- 使用 [Ollama](https://ollama.ai/)、[LocalAI](https://localai.io/) 或 [vLLM](https://vllm.readthedocs.io/) 等工具
+- 将 `NEXT_PUBLIC_BASE_URL` 设置为您服务器的基础 URL
+- 模型将通过 OpenAI 兼容的端点调用
+
+**选项 2：直接模型端点**
+- 使用 `LOCAL_*_ENDPOINT` 变量直接指向您的模型端点
+- 适用于自定义模型服务器或非 OpenAI 兼容的 API
+
+**推荐的本地设置：**
+```bash
+# 使用 Ollama 进行聊天完成的示例
+ollama serve  # 在 http://localhost:11434 启动
+
+# 使用 whisper.cpp 进行转录的示例
+./whisper-server --port 8001  # 在 http://localhost:8001 启动
+```
+
 ### 前置要求
 
 - Node.js 18+ 
@@ -151,9 +207,21 @@ pnpm install
 3. 配置环境变量：
 创建 `.env.local` 文件并添加以下内容：
 ```env
-NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key
-NEXT_PUBLIC_BASE_URL=your_endpoint
+# 用于 OpenAI 兼容的本地 API 服务器（推荐）
+NEXT_PUBLIC_OPENAI_API_KEY=local-key
+NEXT_PUBLIC_BASE_URL=http://localhost:8000/v1
+
+# 用于直接本地模型端点（替代方案）
+LOCAL_WHISPER_ENDPOINT=http://localhost:8001/v1/audio/transcriptions
+LOCAL_CHAT_ENDPOINT=http://localhost:8000/v1/chat/completions
+LOCAL_WHISPER_MODEL=whisper-1
+LOCAL_CHAT_MODEL=llama-3.1-8b-instruct
 ```
+
+**本地模型设置：**
+- 如果设置了 `NEXT_PUBLIC_BASE_URL`，应用将使用 OpenAI 兼容的 API 端点
+- 否则，将使用由 `LOCAL_*_ENDPOINT` 变量指定的直接端点
+- 模型名称可通过 `LOCAL_*_MODEL` 变量自定义
 
 4. 启动开发服务器：
 ```bash
